@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Base</title>
+  <!-- Link external CSS -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <!-- Orb toggle -->
+  <div id="themeOrb">🌙</div>
+
+  <!-- Main Server -->
+  <div id="statusBox" class="statusBox loading">
+    🖥️ <span class="statusTitle">Main Server</span><br>
+    🕒 Time: <span id="srvTime">--</span><br>
+    ⏱ Uptime: <span id="srvUptime">--</span><br>
+    ⚙️ CPU: <span id="srvCpu">--</span>
+    <div class="bar"><div id="cpuBar" class="bar-fill"></div></div>
+    💾 RAM: <span id="srvRam">--</span>
+    <div class="bar"><div id="ramBar" class="bar-fill"></div></div>
+    🎮 GPU: <span id="srvGpu">--</span>
+  </div>
+
+  <!-- Frigate -->
+  <div id="camStatusBox" class="statusBox loading">
+    📹 <span class="statusTitle">Frigate Server</span><br>
+    ⏱ Uptime: <span id="camUptime">--</span><br>
+    ⚙️ CPU: <span id="camCpu">--</span>
+    <div class="bar"><div id="camCpuBar" class="bar-fill"></div></div>
+    💾 RAM: <span id="camRam">--</span>
+    <div class="bar"><div id="camRamBar" class="bar-fill"></div></div>
+    🗄 Disk: <span id="camDisk">--</span>
+  </div>
+
+  <!-- Minerva -->
+  <div id="minervaBox" class="statusBox loading">
+    📍 <span class="statusTitle">Minerva</span><br>
+    <span id="minervaContent">Loading Minerva info…</span>
+  </div>
+
+  <!-- VM -->
+  <div class="vm-card">
+    🪟 Windows 11 VM RDP
+    <span id="vmPill" class="vm-pill">checking…</span><br>
+    <strong>192.168.1.218:3390</strong>
+    <div style="margin-top:15px;">
+      <button id="btnStart" class="vm-btn start" onclick="vmAction('start')">Start VM</button>
+      <button id="btnStop" class="vm-btn stop" onclick="vmAction('stop')">Stop VM</button>
+      <div id="vmResult" class="vm-result muted"></div>
+    </div>
+  </div>
+
+  <!-- Links -->
+  <h1>
+    <svg width="42" height="42" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"
+         style="vertical-align:middle; margin-right:10px; filter: drop-shadow(0 0 6px #b026ff);">
+      <circle cx="32" cy="32" r="14" fill="#b026ff" stroke="#6a11cb" stroke-width="3"/>
+      <ellipse cx="32" cy="32" rx="28" ry="10" fill="none" stroke="#d18bff" stroke-width="3"/>
+    </svg>
+    Home Base
+  </h1>
+
+  <a class="button" href="http://192.168.1.238:5000">Frigate</a>
+  <a class="button" href="http://192.168.1.218:32400">Plex</a>
+  <a class="button" href="http://192.168.1.218:8081/emulatorjs.html">EmulatorJS</a>
+  <a class="button" href="http://192.168.1.218:8006">Windows 11 VM</a>
+  <a class="button" href="http://192.168.1.218/admin">Pi-hole</a>
+  <a class="button" href="http://192.168.1.218:8080">File Browser</a>
+  <a class="button" href="http://192.168.1.218:8123">Home Assistant</a>
+  <a class="button" href="http://192.168.1.218:9090">Cockpit</a>
+  <a class="button" href="http://192.168.1.218:9000">Portainer</a>
+  <a class="button" href="http://192.168.1.218:3000">Wiki</a>
+  <a class="button" href="http://192.168.1.218:8081/gcode.html">Gcode Editor</a>
+  <a class="button" href="http://192.168.1.218:8081/gcodeconvo">Mill convo</a>
+  <a class="button" href="http://192.168.1.218:3001/">Git</a>
+  <a class="button" href="http://192.168.1.218:8085/sandify.html">Sandify</a>
+
+<script>
+/* Theme toggle orb */
+const orb = document.getElementById("themeOrb");
+orb.addEventListener("click", () => {
+  document.body.classList.toggle("day");
+  orb.textContent = document.body.classList.contains("day") ? "☀️" : "🌙";
+});
+
+// --- Main Server
+async function updateStatus() {
+  try {
+    const res = await fetch("http://192.168.1.218:5050/status");
+    const data = await res.json();
+    document.getElementById("srvTime").textContent   = data.time ?? "--";
+    document.getElementById("srvUptime").textContent = data.uptime ?? "--";
+    document.getElementById("srvCpu").textContent    =
+      `${data.cpu?.percent ?? "?"}% @ ${data.cpu?.freq_mhz ?? "?"} MHz (${data.cpu?.cores_pretty ?? "?"})`;
+    document.getElementById("cpuBar").style.width    = (data.cpu?.percent ?? 0) + "%";
+    document.getElementById("srvRam").textContent    =
+      `${data.ram?.used_gb ?? "?"} / ${data.ram?.total_gb ?? "?"} GB (${data.ram?.percent ?? "?"}%)`;
+    document.getElementById("ramBar").style.width    = (data.ram?.percent ?? 0) + "%";
+    document.getElementById("srvGpu").textContent    =
+      `${data.gpu?.busy_percent ?? "?"}% @ ${data.gpu?.core_clock_mhz ?? "?"}/${data.gpu?.mem_clock_mhz ?? "?"} MHz, ${data.gpu?.temp_c ?? "?"}°C`;
+
+    const box = document.getElementById("statusBox");
+    box.classList.remove("status-ok","status-warn","status-error");
+    if ((data.cpu?.percent ?? 0) < 50) box.classList.add("status-ok");
+    else if ((data.cpu?.percent ?? 0) < 80) box.classList.add("status-warn");
+    else box.classList.add("status-error");
+  } catch {
+    document.getElementById("statusBox").classList.add("status-error");
+  }
+}
+setInterval(updateStatus, 5000); updateStatus();
+
+// --- Frigate
+async function updateCamStatus() {
+  try {
+    const res = await fetch("http://192.168.1.238:5050/status");
+    const data = await res.json();
+    document.getElementById("camUptime").textContent = data.uptime ?? "--";
+    document.getElementById("camCpu").textContent    =
+      `${data.cpu?.percent ?? "?"}% @ ${data.cpu?.freq_mhz ?? "?"} MHz (${data.cpu?.cores ?? "?"} cores)`;
+    document.getElementById("camCpuBar").style.width = (data.cpu?.percent ?? 0) + "%";
+    document.getElementById("camRam").textContent    =
+      `${data.ram?.used_gb ?? "?"} / ${data.ram?.total_gb ?? "?"} GB (${data.ram?.percent ?? "?"}%)`;
+    document.getElementById("camRamBar").style.width = (data.ram?.percent ?? 0) + "%";
+    document.getElementById("camDisk").textContent   =
+      `${data.disk?.used_gb ?? "?"} / ${data.disk?.total_gb ?? "?"} GB (${data.disk?.percent ?? "?"}%)`;
+
+    const box = document.getElementById("camStatusBox");
+    box.classList.remove("status-ok","status-warn","status-error");
+    if ((data.cpu?.percent ?? 0) < 50) box.classList.add("status-ok");
+    else if ((data.cpu?.percent ?? 0) < 80) box.classList.add("status-warn");
+    else box.classList.add("status-error");
+  } catch {
+    document.getElementById("camStatusBox").classList.add("status-error");
+  }
+}
+setInterval(updateCamStatus, 5000); updateCamStatus();
+
+// --- Minerva
+async function updateMinerva() {
+  try {
+    const res = await fetch("http://192.168.1.218:5055/");
+    const html = await res.text();
+    document.getElementById("minervaContent").innerHTML = html;
+    const box = document.getElementById("minervaBox");
+    box.classList.remove("loading");
+    box.classList.add("status-ok");
+  } catch {
+    document.getElementById("minervaBox").classList.add("status-error");
+    document.getElementById("minervaContent").textContent = "Error fetching info";
+  }
+}
+setInterval(updateMinerva, 60000); updateMinerva();
+
+// --- VM
+const btnStart = document.getElementById('btnStart');
+const btnStop  = document.getElementById('btnStop');
+const vmRes    = document.getElementById('vmResult');
+const vmPill   = document.getElementById('vmPill');
+
+function setResult(text, cls) {
+  vmRes.className = 'vm-result ' + (cls||'muted');
+  vmRes.textContent=text||'';
+}
+function setPill(text,cls){
+  vmPill.textContent=text;
+  vmPill.className='vm-pill '+(cls||'');
+}
+function setBusy(b){
+  btnStart.disabled=b; btnStop.disabled=b;
+  if(b) setResult('Working…','muted');
+}
+
+async function refreshVmStatus() {
+  try {
+    const r = await fetch('http://192.168.1.218:5051/status');
+    const t = (await r.text()).trim().toLowerCase();
+    if (t.includes('up')) setPill('Running','running');
+    else setPill('Stopped','stopped');
+  } catch {
+    setPill('Unknown','');
+  }
+}
+
+async function vmAction(action) {
+  try {
+    setBusy(true);
+    const res = await fetch(`http://192.168.1.218:5051/${action}`);
+    const text = (await res.text()).trim();
+    if (res.ok && text.startsWith('[OK]')) {
+      setResult(text,'ok');
+      let tries = 0;
+      const poll = setInterval(async () => {
+        await refreshVmStatus();
+        tries++;
+        if ((vmPill.textContent === "Running" && action === "start") ||
+            (vmPill.textContent === "Stopped" && action === "stop") ||
+            tries > 10) {
+          clearInterval(poll);
+          setBusy(false);
+        }
+      }, 1500);
+    } else {
+      setResult(text||'Error','err');
+      setBusy(false);
+    }
+  } catch {
+    setResult('Error talking to VM service','err');
+    setBusy(false);
+  }
+}
+
+refreshVmStatus();
+setInterval(refreshVmStatus,5000);
+</script>
+</body>
+</html>
+

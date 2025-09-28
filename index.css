@@ -1,0 +1,222 @@
+/* Night background (10% less purple) */
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: radial-gradient(ellipse at bottom, #20002e 0%, #100020 40%, #090a0f 100%);
+  color: #e5d9ff;
+  text-align: center;
+  padding: 40px;
+  min-height: 100vh;
+  margin: 0;
+  position: relative;
+  transition: background 1s ease, color 1s ease;
+}
+
+/* Stars */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 200%; height: 200%;
+  background: url('https://www.transparenttextures.com/patterns/stardust.png') repeat;
+  opacity: 0.3;
+  animation: starDrift 120s linear infinite;
+  z-index: -1;
+}
+@keyframes starDrift {
+  from { transform: translate(0,0); }
+  to { transform: translate(-500px,-500px); }
+}
+
+/* Day theme: black space + subtle sun glow in top-right */
+body.day {
+  background:
+    radial-gradient(circle at top right, rgba(255,223,100,0.25) 0%, rgba(0,0,0,0) 40%),
+    #000000;
+  color: #f5f5f5;
+}
+
+/* Orb theme toggle */
+#themeOrb {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 0 12px rgba(176,38,255,0.6);
+  background: radial-gradient(circle, #b026ff, #6a11cb);
+  color: #fff;
+  transition: all 0.5s ease;
+}
+body.day #themeOrb {
+  background: radial-gradient(circle, #ffeb3b, #fbc02d);
+  box-shadow: 0 0 18px rgba(255,223,100,0.7);
+  color: #000;
+}
+#themeOrb:hover { transform: scale(1.15); }
+
+/* Cosmic Header */
+h1 {
+  color: #d18bff;
+  font-size: 42px;
+  text-shadow: 0 0 15px rgba(209,139,255,0.8), 0 0 30px rgba(176,38,255,0.5);
+  margin-bottom: 25px;
+  transition: color 1s ease, text-shadow 1s ease;
+}
+body.day h1 {
+  color: #ffeb3b;
+  text-shadow: 0 0 15px rgba(255,223,100,0.6);
+}
+
+/* Buttons */
+.button {
+  display: block;
+  width: 240px;
+  margin: 14px auto;
+  padding: 14px;
+  background: linear-gradient(135deg, #6a11cb, #b026ff);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 15px rgba(176,38,255,0.5);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+.button:hover { transform: scale(1.07); box-shadow: 0 0 25px rgba(176,38,255,0.9); }
+.button::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+}
+.button:hover::before { animation: shine 0.75s forwards; }
+@keyframes shine { 100% { left: 125%; } }
+
+/* Status boxes */
+.statusBox {
+  background: rgba(34, 0, 51, 0.8);
+  border: 1px solid #663399;
+  border-left: 6px solid #9c27b0;
+  color: #e1cfff;
+  font-family: monospace;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(156,39,176,0.4);
+  max-width: 480px;
+  width: 90%;
+  margin: 0 auto 30px auto;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+/* Make them full width on iPhone/small screens */
+@media (max-width: 600px) {
+  .statusBox {
+    max-width: 95%;
+    width: 95%;
+    font-size: 14px;
+    padding: 15px;
+  }
+}
+
+.status-ok    { border-left-color: #8e24aa; box-shadow: 0 0 15px #ba68c8; }
+.status-warn  { border-left-color: #ff9800; box-shadow: 0 0 15px #ffb74d; }
+.status-error { border-left-color: #e53935; box-shadow: 0 0 15px #ef5350; }
+
+.bar {
+  height: 10px;
+  border-radius: 5px;
+  background: #333;
+  margin: 6px 0 10px 0;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6a11cb, #b026ff);
+  width: 0;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px rgba(176,38,255,0.6);
+}
+
+/* VM Control */
+.vm-card {
+  background: rgba(20,20,35,0.9);
+  color: #e0dfff;
+  padding: 22px;
+  margin: 25px auto;
+  max-width: 360px;
+  border-radius: 15px;
+  font-family: monospace;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(106,17,203,0.6);
+  border: 1px solid #6a11cb;
+}
+.vm-pill {
+  display:inline-block;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:14px;
+  margin-left:10px;
+  background:#555;
+  color:#ddd;
+}
+.vm-pill.running {
+  background:#6a11cb;
+  color:#fff;
+  box-shadow:0 0 8px #b026ff;
+}
+.vm-pill.stopped {
+  background:#b026ff;
+  color:#fff;
+  box-shadow:0 0 8px #ff4081;
+}
+
+.vm-btn {
+  display:block;
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  margin-bottom:12px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.vm-btn:disabled { opacity:0.6; cursor:not-allowed; }
+.vm-btn:hover:not(:disabled) { transform: scale(1.05); }
+.vm-btn.start {
+  background: linear-gradient(135deg, #3949ab, #6a11cb);
+  box-shadow:0 0 15px #6a11cb;
+}
+.vm-btn.stop {
+  background: linear-gradient(135deg, #b026ff, #e53935);
+  box-shadow:0 0 15px #e53935;
+}
+.vm-result {
+  margin-top:12px;
+  font-size:14px;
+  min-height:1.2em;
+}
+.vm-result.ok { color:#9ccc65; }
+.vm-result.err { color:#ef9a9a; }
+.vm-result.muted{ color:#bdbdbd; }
+
+@media (max-width: 600px) {
+  body { padding:20px; }
+  h1 { font-size: 28px; }
+  .button { width: 90%; font-size:18px; }
+}
+
